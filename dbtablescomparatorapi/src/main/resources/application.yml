@@ -1,0 +1,29 @@
+database:
+  host: ykarami-mac
+  svc: EEDBYK
+  port: 1521
+  user:
+    username: SYS as SYSDBA
+    password: =p8zDrj6LbuOGlhH+
+
+server:
+  port: 8480
+
+
+spring:
+  application:
+    name: dbtablescomparatorapi
+  datasource:
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    #jdbc:oracle:thin:@ykarami-mac:1521:EEDBYK
+    url: jdbc:oracle:thin:@${database.host}:${database.port}/${database.svc}
+    username: ${database.user.username}
+    password: ${database.user.password}
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    database: oracle
+    properties:
+      hibernate:
+        default_schema: ${database.schema}
+        generate_statistics: true
+    open-in-view: false
