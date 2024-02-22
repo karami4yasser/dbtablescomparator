@@ -21,10 +21,14 @@ export async function createTempTable(tables: string[]) {
   return result;
 }
 
-export async function compareTablesData(tableName: string, columns: string[]) {
+export async function compareTablesData(
+  tableName: string,
+  filter: string,
+  columns: string[]
+) {
   let requestParam = columns.reduce(joinStrings);
   let result = await ApiService.get(
-    `/api/dbtablescomparator/${tableName}?columns=${requestParam}`
+    `/api/dbtablescomparator/${tableName}?filter=${filter}&columns=${requestParam}`
   );
   return result;
 }

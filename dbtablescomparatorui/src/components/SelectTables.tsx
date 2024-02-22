@@ -210,6 +210,7 @@ export default function SelectTables(props: SelectTablesProps) {
         <Button
           onClick={handleNext}
           color="inherit"
+          disabled={selectedTables.length == 0 ? true : false}
           sx={{
             width: 50,
             height: 50,

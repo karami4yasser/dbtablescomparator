@@ -93,12 +93,16 @@ export default function Result(props: ResultColumnsProps) {
   }
   const [tableData, setTableData] = React.useState<any>({}); // Initialize empty table data
   const [selectedTable, setSelectedTable] = React.useState<string | null>(null); // Track selected table
-
+  const [dataFilter, setDataFilter] = React.useState<string>("ALL");
   const fetchData = async (tableName: string, selectedColumns: string[]) => {
     // Make your API call here, passing tableName and selectedColumns
     // Example using async/await:
     try {
-      const response = await compareTablesData(tableName, selectedColumns);
+      const response = await compareTablesData(
+        tableName,
+        dataFilter,
+        selectedColumns
+      );
       const data = await response.data;
 
       console.log("response" + response.data);
@@ -247,75 +251,34 @@ export default function Result(props: ResultColumnsProps) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {allData === "All Data" &&
-                  tableData.map((item: any, index: any) => (
-                    <React.Fragment key={index}>
-                      {/* Row for Table */}
-                      <TableRow
-                        style={{
-                          backgroundColor: item.areEquals ? "white" : "red",
-                        }}
-                      >
-                        <TableCell style={{ backgroundColor: "wheat" }}>
-                          Current Table {" > "}
+                {tableData.map((item: any, index: any) => (
+                  <React.Fragment key={index}>
+                    {/* Row for Table */}
+                    <TableRow
+                      style={{
+                        backgroundColor: item.areEquals ? "white" : "red",
+                      }}
+                    >
+                      <TableCell style={{ backgroundColor: "wheat" }}>
+                        Current Table {" > "}
+                      </TableCell>
+                      {Object.keys(item.table.rowColumnsMap).map((col) => (
+                        <TableCell>{item.table.rowColumnsMap[col]}</TableCell>
+                      ))}
+
+                      <TableCell style={{ backgroundColor: "wheat" }}>
+                        Temp Old Table {" > "}
+                      </TableCell>
+                      {/* Empty cells for Temp Table */}
+                      {Object.keys(item.temp_table.rowColumnsMap).map((col) => (
+                        <TableCell>
+                          {item.temp_table.rowColumnsMap[col]}
                         </TableCell>
-                        {Object.keys(item.table.rowColumnsMap).map((col) => (
-                          <TableCell>{item.table.rowColumnsMap[col]}</TableCell>
-                        ))}
-
-                        <TableCell style={{ backgroundColor: "wheat" }}>
-                          Temp Old Table {" > "}
-                        </TableCell>
-                        {/* Empty cells for Temp Table */}
-                        {Object.keys(item.temp_table.rowColumnsMap).map(
-                          (col) => (
-                            <TableCell>
-                              {item.temp_table.rowColumnsMap[col]}
-                            </TableCell>
-                          )
-                        )}
-                        <TableCell>{item.areEquals.toString()}</TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-
-                {allData === "Filterd" &&
-                  tableData
-                    .filter((item: any) => {
-                      return item.areEquals.toString() === "false";
-                    })
-                    .map((item: any, index: any) => (
-                      <React.Fragment key={index}>
-                        {/* Row for Table */}
-                        <TableRow
-                          style={{
-                            backgroundColor: item.areEquals ? "white" : "red",
-                          }}
-                        >
-                          <TableCell style={{ backgroundColor: "wheat" }}>
-                            Current Table {" > "}
-                          </TableCell>
-                          {Object.keys(item.table.rowColumnsMap).map((col) => (
-                            <TableCell>
-                              {item.table.rowColumnsMap[col]}
-                            </TableCell>
-                          ))}
-
-                          <TableCell style={{ backgroundColor: "wheat" }}>
-                            Temp Old Table {" > "}
-                          </TableCell>
-                          {/* Empty cells for Temp Table */}
-                          {Object.keys(item.temp_table.rowColumnsMap).map(
-                            (col) => (
-                              <TableCell>
-                                {item.temp_table.rowColumnsMap[col]}
-                              </TableCell>
-                            )
-                          )}
-                          <TableCell>{item.areEquals.toString()}</TableCell>
-                        </TableRow>
-                      </React.Fragment>
-                    ))}
+                      ))}
+                      <TableCell>{item.areEquals.toString()}</TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>

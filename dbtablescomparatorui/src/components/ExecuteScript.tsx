@@ -41,7 +41,7 @@ export default function ExecuteScript(props: ExecuteScriptProps) {
       <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
         <Button
           color="inherit"
-          disabled={true}
+          disabled={false}
           onClick={handleBack}
           sx={{ width: 50, height: 50, backgroundColor: "white" }}
         >

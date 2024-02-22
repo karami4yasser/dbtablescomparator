@@ -86,6 +86,33 @@ export default function Stepper() {
     setActiveStep(0);
   };
 
+  const handleBack1 = () => {
+    setTables([
+      {
+        name: "",
+        selectedColumns: [],
+      },
+    ]);
+    tablesNames.current.clear();
+    setActiveStep(0);
+  };
+
+  const handleBack2 = () => {
+    setActiveStep(1);
+  };
+
+  const handleBack3 = () => {
+    setActiveStep(2);
+  };
+
+  const handleBack4 = () => {
+    setActiveStep(3);
+  };
+
+  const handleBack5 = () => {
+    setActiveStep(4);
+  };
+
   const handleReset = () => {
     setActiveStep(0);
   };
@@ -139,8 +166,7 @@ export default function Stepper() {
     <Box
       sx={{
         width: "100%",
-        height: window.screen.height,
-        flex: 1,
+        height: window.screen.height * 2,
         alignItems: "center",
       }}
     >
@@ -194,7 +220,7 @@ export default function Stepper() {
 
           {activeStep == 2 ? (
             <SelectColumns
-              handleBack={handleBack}
+              handleBack={handleBack2}
               handleNext={handleStep3Next}
               selectedTables={tablesNames.current}
             />
@@ -206,7 +232,7 @@ export default function Stepper() {
             <ExecuteScript
               scriptName="B"
               handleNext={handleStep4Next}
-              handleBack={handleBack}
+              handleBack={handleBack3}
               isFirst={false}
             />
           ) : (

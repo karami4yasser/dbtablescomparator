@@ -19,6 +19,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Typography,
@@ -103,7 +104,7 @@ export default function Result(props: ResultColumnsProps) {
   function handleNext(): void {
     props.handleNext();
   }
-  const [tableData, setTableData] = React.useState<any>({}); // Initialize empty table data
+  const [tableData, setTableData] = React.useState<any>(null); // Initialize empty table data
   const [selectedTable, setSelectedTable] = React.useState<string | null>(null); // Track selected table
   const [dataFilter, setDataFilter] = React.useState<string>("ALL");
   const [fileType, setFileType] = React.useState<string>("PDF");
@@ -112,7 +113,12 @@ export default function Result(props: ResultColumnsProps) {
     // Make your API call here, passing tableName and selectedColumns
     // Example using async/await:
     try {
-      const response = await compareTablesData(tableName, selectedColumns);
+      setLoading(true);
+      const response = await compareTablesData(
+        tableName,
+        dataFilter,
+        selectedColumns
+      );
       const data = await response.data;
 
       console.log("response" + response.data);
@@ -124,21 +130,6 @@ export default function Result(props: ResultColumnsProps) {
     }
   };
 
-  const downloadData = async (tableName: string, selectedColumns: string[]) => {
-    // Make your API call here, passing tableName and selectedColumns
-    // Example using async/await:
-    try {
-      const response = await generatePdf(tableName, selectedColumns);
-      console.log(response);
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-
-      setLoading(false);
-    } catch (error) {
-      // Handle errors gracefully, e.g., display an error message
-      console.error("Error fetching data:", error);
-    }
-  };
   const onFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDataFilter((event.target as HTMLInputElement).value);
   };
@@ -161,6 +152,25 @@ export default function Result(props: ResultColumnsProps) {
       );
     }
   };
+
+  const handleFetch = () => {
+    if (!selectedTable) {
+      toast.error("No Table Is Selected");
+    } else {
+      fetchData(selectedTable, selectedColumns[selectedTable]);
+    }
+  };
+  const [pg, setpg] = React.useState(0);
+  const [rpg, setrpg] = React.useState(5);
+
+  function handleChangePage(event: any, newpage: any) {
+    setpg(newpage);
+  }
+
+  function handleChangeRowsPerPage(event: any) {
+    setrpg(parseInt(event.target.value, 10));
+    setpg(0);
+  }
 
   if (loading) {
     return (
@@ -294,28 +304,141 @@ export default function Result(props: ResultColumnsProps) {
           </FormControl>
         </div>
       </div>
-      <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+          flexDirection: "row",
+          pt: 2,
+        }}
+      >
         <Button
           color="inherit"
           disabled={false}
           onClick={handleBack}
-          sx={{ width: 50, height: 50, backgroundColor: "white" }}
+          sx={{
+            width: 150,
+            height: 50,
+            backgroundColor: "white",
+            marginRight: 10,
+          }}
         >
-          Back
+          Reset
         </Button>
-        <Box sx={{ flex: "1 1 auto" }} />
         <Button
           onClick={handleDownload}
           color="inherit"
+          disabled={selectedTable ? false : true}
+          sx={{
+            width: 150,
+            height: 50,
+            backgroundColor: "white",
+
+            marginRight: 10,
+          }}
+        >
+          {"Download fILE"}
+        </Button>
+
+        <Button
+          onClick={handleFetch}
+          color="inherit"
+          disabled={selectedTable ? false : true}
           sx={{
             width: 150,
             height: 50,
             backgroundColor: "white",
           }}
         >
-          {"Download fILE"}
+          {"Get Results"}
         </Button>
+        <Box sx={{ flex: "1 1 auto", marginBottom: 12 }} />
       </Box>
+
+      {tableData && tableData.length > 0 && (
+        <Paper>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell style={{ backgroundColor: "wheat" }}>
+                    Current Table {" > "}
+                  </TableCell>
+                  {Object.keys(tableData[0]?.table?.rowColumnsMap).map(
+                    (col) => (
+                      <TableCell>{col}</TableCell>
+                    )
+                  )}
+                  <TableCell style={{ backgroundColor: "wheat" }}>
+                    Temp Old Table {" > "}
+                  </TableCell>
+                  {Object.keys(tableData[0]?.table?.rowColumnsMap).map(
+                    (col) => (
+                      <TableCell>{col}</TableCell>
+                    )
+                  )}
+                  <TableCell>Are Equals</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableData
+                  .slice(pg * rpg, pg * rpg + rpg)
+                  .map((item: any, index: any) => (
+                    <React.Fragment key={index}>
+                      {/* Row for Table */}
+                      <TableRow
+                        style={{
+                          backgroundColor: item.areEquals ? "white" : "red",
+                        }}
+                      >
+                        <TableCell style={{ backgroundColor: "wheat" }}>
+                          Current Table {" > "}
+                        </TableCell>
+                        {Object.keys(item?.table?.rowColumnsMap).map((col) => (
+                          <TableCell>
+                            {item?.table?.rowColumnsMap[col]}
+                          </TableCell>
+                        ))}
+
+                        <TableCell style={{ backgroundColor: "wheat" }}>
+                          Temp Old Table {" > "}
+                        </TableCell>
+                        {/* Empty cells for Temp Table */}
+                        {Object.keys(item?.temp_table?.rowColumnsMap).map(
+                          (col) => (
+                            <TableCell>
+                              {item?.temp_table?.rowColumnsMap[col]}
+                            </TableCell>
+                          )
+                        )}
+                        <TableCell>{item.areEquals.toString()}</TableCell>
+                      </TableRow>
+                    </React.Fragment>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={tableData.length}
+            rowsPerPage={rpg}
+            page={pg}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      )}
+      {tableData && tableData.length == 0 && (
+        <Typography
+          style={{
+            fontSize: 50,
+            textAlign: "center",
+          }}
+        >
+          No Different Data
+        </Typography>
+      )}
     </Box>
   );
 }

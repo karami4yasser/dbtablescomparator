@@ -54,8 +54,11 @@ public class DbTablesComparatorController
 
     @GetMapping("/{tableName}")
     @ResponseBody
-    public List<CompareResult> compareTablesData(@PathVariable("tableName") String tableName,@RequestParam(name = "columns") String... columns){
-        return dbTablesComparatorService.compareTablesData(tableName,Optional.of(DataFilter.ALL),columns);
+    public List<CompareResult> compareTablesData(
+            @PathVariable("tableName") String tableName,
+            @RequestParam(name ="filter", required = false,defaultValue = "ALL") Optional<DataFilter> filter,
+            @RequestParam(name = "columns") String... columns){
+        return dbTablesComparatorService.compareTablesData(tableName,filter,columns);
     }
 
 
