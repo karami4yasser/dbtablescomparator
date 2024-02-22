@@ -29,7 +29,16 @@ export async function compareTablesData(tableName: string, columns: string[]) {
   return result;
 }
 
+export async function generatePdf(tableName: string, columns: string[]) {
+  let requestParam = columns.reduce(joinStrings);
+  let result = await ApiService.get(
+    `/api/dbtablescomparator/pdf/${tableName}?columns=${requestParam}`
+  );
+  console.log(result.data);
+  return result;
+}
+
 // function to join each string elements
-function joinStrings(accumulator: string, currentValue: string) {
+export function joinStrings(accumulator: string, currentValue: string) {
   return accumulator + "," + currentValue;
 }

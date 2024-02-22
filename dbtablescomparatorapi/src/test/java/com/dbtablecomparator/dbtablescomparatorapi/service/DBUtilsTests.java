@@ -2,12 +2,14 @@ package com.dbtablecomparator.dbtablescomparatorapi.service;
 
 import com.dbtablecomparator.dbtablescomparatorapi.utils.CompareResult;
 import com.dbtablecomparator.dbtablescomparatorapi.utils.Data;
+import com.dbtablecomparator.dbtablescomparatorapi.utils.DataFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -69,7 +71,7 @@ public class DBUtilsTests {
     @Test
     void compareTablesData() {
 
-        List<CompareResult> result = dbUtils.compareTablesData("ORDERS","USERID");
+        List<CompareResult> result = dbUtils.compareTablesData("ORDERS", Optional.of(DataFilter.ALL),"USERID");
 
         assertNotNull(result);
 

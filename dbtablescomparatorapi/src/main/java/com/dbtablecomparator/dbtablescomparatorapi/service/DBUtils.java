@@ -1,9 +1,6 @@
 package com.dbtablecomparator.dbtablescomparatorapi.service;
 
-import com.dbtablecomparator.dbtablescomparatorapi.utils.CompareResult;
-import com.dbtablecomparator.dbtablescomparatorapi.utils.Data;
-import com.dbtablecomparator.dbtablescomparatorapi.utils.DatabaseColumnComparator;
-import com.dbtablecomparator.dbtablescomparatorapi.utils.Row;
+import com.dbtablecomparator.dbtablescomparatorapi.utils.*;
 import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +11,7 @@ import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -149,12 +143,14 @@ public class DBUtils {
         return result;
     }
 
-    public List<CompareResult> compareTablesData(String tableName,String... columns)
+    public List<CompareResult> compareTablesData(String tableName, Optional<DataFilter> filter, String... columns)
     {
 
         Map<String,Data> result = getTableOldAndNewData(tableName);
         List<Row> currentTableRows  = result.get(tableName).getRows();
         List<Row> tempTableDataRows = result.get(String.format("temp_%s",tableName)).getRows();
+
+        boolean getAll = filter.isPresent() && filter.get() == DataFilter.ALL ? Boolean.TRUE : Boolean.FALSE;
 
 
         List<CompareResult> rows = new ArrayList<>();
@@ -164,22 +160,39 @@ public class DBUtils {
             Map<String,Object> currentTableRowCol = currentTableRows.get(i).getRowColumnsMap();
             Map<String,Object> tempTableDataRowCol = tempTableDataRows.get(i).getRowColumnsMap();
             boolean areEquals=Boolean.TRUE;
+            Set<String> diffColumns = new HashSet<>();
             for(String col:columns)
             {
                 if(DatabaseColumnComparator.compare(currentTableRowCol.get(col),tempTableDataRowCol.get(col)) !=0 )
                 {
                     areEquals=Boolean.FALSE;
-                    break;
+                    diffColumns.add(col);
                 }
             }
+            if(getAll == Boolean.FALSE)
+            {
+                if(areEquals==Boolean.FALSE) {
+                    rows.add(
+                            CompareResult
+                                    .builder()
+                                    .table(currentTableRows.get(i))
+                                    .temp_table(tempTableDataRows.get(i))
+                                    .areEquals(areEquals)
+                                    .diffColumns(diffColumns)
+                                    .build());
+                }
 
-            rows.add(
-                    CompareResult
-                    .builder()
-                            .table(currentTableRows.get(i))
-                            .temp_table(tempTableDataRows.get(i))
-                            .areEquals(areEquals)
-                    .build());
+            }
+            else {
+                rows.add(
+                        CompareResult
+                                .builder()
+                                .table(currentTableRows.get(i))
+                                .temp_table(tempTableDataRows.get(i))
+                                .areEquals(areEquals)
+                                .diffColumns(diffColumns)
+                                .build());
+            }
         }
 
 

@@ -2,12 +2,16 @@ import {
   Box,
   Button,
   Checkbox,
+  FormControl,
   FormControlLabel,
+  FormLabel,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
   Paper,
+  Radio,
+  RadioGroup,
   Step,
   StepLabel,
   Table,
@@ -22,15 +26,29 @@ import {
 import * as React from "react";
 import {
   compareTablesData,
+  generatePdf,
   getTablesColumns,
+  joinStrings,
 } from "../services/DbTablesComparatorService";
 import { table } from "./Stepper";
 import { Map } from "typescript";
 import { Console } from "console";
+import toast from "react-hot-toast";
+import { BASE_API } from "../utils/Constant";
 
 export interface ResultColumnsProps {
   handleNext: () => void;
   handleBack: () => void;
+}
+
+export enum DataFilter {
+  ALL,
+  DIFF,
+}
+
+export enum FileType {
+  PDF,
+  CSV,
 }
 
 export default function Result(props: ResultColumnsProps) {
@@ -87,13 +105,8 @@ export default function Result(props: ResultColumnsProps) {
   }
   const [tableData, setTableData] = React.useState<any>({}); // Initialize empty table data
   const [selectedTable, setSelectedTable] = React.useState<string | null>(null); // Track selected table
-
-  const handleViewSwitch = (tableName: string) => {
-    setSelectedTable(tableName);
-    setLoading(true);
-    // Fetch data from backend based on selected table and selected columns
-    fetchData(tableName, selectedColumns[tableName]);
-  };
+  const [dataFilter, setDataFilter] = React.useState<string>("ALL");
+  const [fileType, setFileType] = React.useState<string>("PDF");
 
   const fetchData = async (tableName: string, selectedColumns: string[]) => {
     // Make your API call here, passing tableName and selectedColumns
@@ -103,12 +116,49 @@ export default function Result(props: ResultColumnsProps) {
       const data = await response.data;
 
       console.log("response" + response.data);
-
       setTableData(response.data);
       setLoading(false);
     } catch (error) {
       // Handle errors gracefully, e.g., display an error message
       console.error("Error fetching data:", error);
+    }
+  };
+
+  const downloadData = async (tableName: string, selectedColumns: string[]) => {
+    // Make your API call here, passing tableName and selectedColumns
+    // Example using async/await:
+    try {
+      const response = await generatePdf(tableName, selectedColumns);
+      console.log(response);
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      setLoading(false);
+    } catch (error) {
+      // Handle errors gracefully, e.g., display an error message
+      console.error("Error fetching data:", error);
+    }
+  };
+  const onFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDataFilter((event.target as HTMLInputElement).value);
+  };
+  const onTableChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedTable((event.target as HTMLInputElement).value);
+  };
+
+  const onFileTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFileType((event.target as HTMLInputElement).value);
+  };
+
+  const handleDownload = () => {
+    if (!selectedTable) {
+      toast.error("No Table Is Selected");
+    } else {
+      let requestParam = selectedColumns[selectedTable].reduce(joinStrings);
+      window.open(
+        `${BASE_API}/api/dbtablescomparator/doc/${selectedTable}?filter=${dataFilter}&filetype=${fileType}&columns=${requestParam}`,
+        "_blank"
+      );
     }
   };
 
@@ -149,9 +199,11 @@ export default function Result(props: ResultColumnsProps) {
         height: window.screen.height,
       }}
     >
-      <Typography sx={{ margin: 5 }}>
-        Choose a Table To get The Result
-      </Typography>
+      <div
+        style={{
+          flex: 1,
+        }}
+      ></div>
       <div
         style={{
           flex: 1,
@@ -165,74 +217,82 @@ export default function Result(props: ResultColumnsProps) {
             alignContent: "space-around",
           }}
         >
-          {Object.keys(selectedColumns).map((tableName) => (
-            <button
-              style={{
-                flex: 1,
-                paddingLeft: 10,
-                marginBottom: 10,
-              }}
-              key={tableName}
-              onClick={() => handleViewSwitch(tableName)}
+          <FormControl>
+            <FormLabel id="demo-radio-buttons-group-label">
+              Select A Table To get Results{" "}
+            </FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              name="radio-buttons-group"
+              onChange={onTableChange}
+              value={selectedTable}
             >
-              {tableName}
-            </button>
-          ))}
+              {Object.keys(selectedColumns).map((tableName) => (
+                <FormControlLabel
+                  value={tableName}
+                  control={<Radio />}
+                  label={tableName}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
         </div>
 
-        {selectedTable && (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell style={{ backgroundColor: "wheat" }}>
-                    Current Table {" > "}
-                  </TableCell>
-                  {Object.keys(tableData[0].table.rowColumnsMap).map((col) => (
-                    <TableCell>{col}</TableCell>
-                  ))}
-                  <TableCell style={{ backgroundColor: "wheat" }}>
-                    Temp Old Table {" > "}
-                  </TableCell>
-                  {Object.keys(tableData[0].table.rowColumnsMap).map((col) => (
-                    <TableCell>{col}</TableCell>
-                  ))}
-                  <TableCell>Are Equals</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tableData.map((item: any, index: any) => (
-                  <React.Fragment key={index}>
-                    {/* Row for Table */}
-                    <TableRow
-                      style={{
-                        backgroundColor: item.areEquals ? "white" : "red",
-                      }}
-                    >
-                      <TableCell style={{ backgroundColor: "wheat" }}>
-                        Current Table {" > "}
-                      </TableCell>
-                      {Object.keys(item.table.rowColumnsMap).map((col) => (
-                        <TableCell>{item.table.rowColumnsMap[col]}</TableCell>
-                      ))}
+        {/* View selection */}
+        <div
+          style={{
+            flex: 1,
 
-                      <TableCell style={{ backgroundColor: "wheat" }}>
-                        Temp Old Table {" > "}
-                      </TableCell>
-                      {/* Empty cells for Temp Table */}
-                      {Object.keys(item.temp_table.rowColumnsMap).map((col) => (
-                        <TableCell>
-                          {item.temp_table.rowColumnsMap[col]}
-                        </TableCell>
-                      ))}
-                      <TableCell>{item.areEquals.toString()}</TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+            alignContent: "space-around",
+          }}
+        >
+          <FormControl>
+            <FormLabel id="demo-radio-buttons-group-label">
+              Do you want to get all data or just differences{" "}
+            </FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              name="radio-buttons-group"
+              value={dataFilter}
+              onChange={onFilterChange}
+            >
+              <FormControlLabel
+                value={"ALL"}
+                control={<Radio />}
+                label="Show ALL"
+              />
+              <FormControlLabel
+                value={"DIFF"}
+                control={<Radio />}
+                label="Show Diff"
+              />
+            </RadioGroup>
+          </FormControl>
+        </div>
+
+        {/* View selection */}
+        <div
+          style={{
+            flex: 1,
+
+            alignContent: "space-around",
+          }}
+        >
+          <FormControl>
+            <FormLabel id="demo-radio-buttons-group-label">
+              File export Format :
+            </FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              name="radio-buttons-group"
+              value={fileType}
+              onChange={onFileTypeChange}
+            >
+              <FormControlLabel value={"PDF"} control={<Radio />} label="PDF" />
+              <FormControlLabel value={"CSV"} control={<Radio />} label="CSV" />
+            </RadioGroup>
+          </FormControl>
+        </div>
       </div>
       <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
         <Button
@@ -245,15 +305,15 @@ export default function Result(props: ResultColumnsProps) {
         </Button>
         <Box sx={{ flex: "1 1 auto" }} />
         <Button
-          onClick={handleNext}
+          onClick={handleDownload}
           color="inherit"
           sx={{
-            width: 50,
+            width: 150,
             height: 50,
             backgroundColor: "white",
           }}
         >
-          {"Next"}
+          {"Download fILE"}
         </Button>
       </Box>
     </Box>
