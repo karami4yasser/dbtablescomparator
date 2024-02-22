@@ -388,7 +388,7 @@ export default function Result(props: ResultColumnsProps) {
                       {/* Row for Table */}
                       <TableRow
                         style={{
-                          backgroundColor: item.areEquals ? "white" : "red",
+                          backgroundColor: item.areEquals ? "white" : "pink",
                         }}
                       >
                         <TableCell style={{ backgroundColor: "wheat" }}>

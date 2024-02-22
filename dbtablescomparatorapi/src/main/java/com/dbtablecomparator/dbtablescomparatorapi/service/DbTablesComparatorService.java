@@ -131,25 +131,30 @@ public class DbTablesComparatorService
     }
 
     private void writeTableData(PdfPTable table,CompareResult compareResult,List<String> columnNames) {
-        Color color = Color.PINK;
         Font font = FontFactory.getFont(FontFactory.HELVETICA);
         font.setColor(Color.black);
-        font.setSize(8);
+        font.setSize(7);
+
+        Font fontDiff = FontFactory.getFont(FontFactory.HELVETICA);
+        fontDiff.setColor(Color.red);
+        fontDiff.setSize(7);
+
         PdfPCell cell = new PdfPCell();
         cell.setPhrase(new Phrase("",font));
         table.addCell(cell);
 
 
-        Set<String> diffColmns = compareResult.getDiffColumns();
+        Set<String> diffColumns = compareResult.getDiffColumns();
 
         for(String columnName:columnNames) {
             PdfPCell cell1 = new PdfPCell();
-            if(diffColmns.contains(columnName))
+            if(diffColumns.contains(columnName))
             {
-                cell1.setBackgroundColor(color);
+                cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTable().getRowColumnsMap().get(columnName)),fontDiff));
             }
-
-            cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTable().getRowColumnsMap().get(columnName)),font));
+            else {
+                cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTable().getRowColumnsMap().get(columnName)),font));
+            }
             table.addCell(cell1);
         }
 
@@ -159,11 +164,13 @@ public class DbTablesComparatorService
 
         for(String columnName:columnNames) {
             PdfPCell cell1 = new PdfPCell();
-            if(diffColmns.contains(columnName))
+            if(diffColumns.contains(columnName))
             {
-                cell1.setBackgroundColor(color);
+                cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTemp_table().getRowColumnsMap().get(columnName)),fontDiff));
             }
-            cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTemp_table().getRowColumnsMap().get(columnName)),font));
+            else {
+                cell1.setPhrase(new Phrase(String.valueOf(compareResult.getTemp_table().getRowColumnsMap().get(columnName)),font));
+            }
             table.addCell(cell1);
         }
 
