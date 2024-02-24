@@ -11,7 +11,7 @@
 
 ## Backend : dbtablescomparatorapi
 
-1. Make sure you have Oracle Database started `https://github.com/oracle/docker-images/blob/main/OracleDatabase/SingleInstance/README.md`
+1. Make sure you have Oracle Database started ,`https://dev.to/pazyp/oracle-19c-with-docker-36m5` , `https://github.com/oracle/docker-images/blob/main/OracleDatabase/SingleInstance/README.md`
 2. Install maven `https://www.baeldung.com/install-maven-on-windows-linux-mac`
 3. inside of `dbtablescomparatorapi/src/main/resources/application.yml` replace the database propreties with you values : `host` , `svc` , `username` , `password`
 4. inside of `dbtablescomparatorapi` folder run `mvn spring-boot:run`
