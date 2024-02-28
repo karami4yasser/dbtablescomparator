@@ -1,14 +1,13 @@
 database:
-  host: ykarami-mac
+  host: localhost
   svc: EEDBYK
   port: 1521
   user:
     username: SYS as SYSDBA
-    password: =p8zDrj6LbuOGlhH+
+    password: p8zDrj6LbuOGlhH+
 
 server:
   port: 8480
-
 
 spring:
   application:
