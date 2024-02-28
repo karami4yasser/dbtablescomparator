@@ -388,14 +388,20 @@ export default function Result(props: ResultColumnsProps) {
                       {/* Row for Table */}
                       <TableRow
                         style={{
-                          backgroundColor: item.areEquals ? "white" : "pink",
+                          backgroundColor: "white",
                         }}
                       >
                         <TableCell style={{ backgroundColor: "wheat" }}>
                           Current Table {" > "}
                         </TableCell>
                         {Object.keys(item?.table?.rowColumnsMap).map((col) => (
-                          <TableCell>
+                          <TableCell
+                            style={{
+                              color: item.diffColumns.includes(col)
+                                ? "red"
+                                : "black",
+                            }}
+                          >
                             {item?.table?.rowColumnsMap[col]}
                           </TableCell>
                         ))}
@@ -406,7 +412,13 @@ export default function Result(props: ResultColumnsProps) {
                         {/* Empty cells for Temp Table */}
                         {Object.keys(item?.temp_table?.rowColumnsMap).map(
                           (col) => (
-                            <TableCell>
+                            <TableCell
+                              style={{
+                                color: item.diffColumns.includes(col)
+                                  ? "red"
+                                  : "black",
+                              }}
+                            >
                               {item?.temp_table?.rowColumnsMap[col]}
                             </TableCell>
                           )
