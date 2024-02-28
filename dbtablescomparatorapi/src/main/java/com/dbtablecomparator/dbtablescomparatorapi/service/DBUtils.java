@@ -172,26 +172,12 @@ public class DBUtils {
             if(getAll == Boolean.FALSE)
             {
                 if(areEquals==Boolean.FALSE) {
-                    rows.add(
-                            CompareResult
-                                    .builder()
-                                    .table(currentTableRows.get(i))
-                                    .temp_table(tempTableDataRows.get(i))
-                                    .areEquals(areEquals)
-                                    .diffColumns(diffColumns)
-                                    .build());
+                    rows.add(new CompareResult(currentTableRows.get(i),tempTableDataRows.get(i),areEquals,diffColumns));
                 }
 
             }
             else {
-                rows.add(
-                        CompareResult
-                                .builder()
-                                .table(currentTableRows.get(i))
-                                .temp_table(tempTableDataRows.get(i))
-                                .areEquals(areEquals)
-                                .diffColumns(diffColumns)
-                                .build());
+                rows.add(new CompareResult(currentTableRows.get(i),tempTableDataRows.get(i),areEquals,diffColumns));
             }
         }
 
@@ -205,25 +191,13 @@ public class DBUtils {
         {
             for (int i = minSize; i < currentTableRows.size(); i++)
             {
-                rows.add(
-                        CompareResult
-                                .builder()
-                                .table(currentTableRows.get(i))
-                                .temp_table(null)
-                                .areEquals(false)
-                                .build());
+                rows.add(new CompareResult(currentTableRows.get(i),null,false));
             }
         } else if(tempTableDataRows.size()>minSize)
         {
             for (int i = minSize; i < tempTableDataRows.size(); i++)
             {
-                rows.add(
-                        CompareResult
-                                .builder()
-                                .table(null)
-                                .temp_table(tempTableDataRows.get(i))
-                                .areEquals(false)
-                                .build());
+                rows.add(new CompareResult(null,tempTableDataRows.get(i),false));
             }
         }
         return rows;
