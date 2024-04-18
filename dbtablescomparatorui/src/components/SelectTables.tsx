@@ -34,11 +34,15 @@ export default function SelectTables(props: SelectTablesProps) {
 
   const [error, setError] = React.useState<boolean>(false);
 
+  const [numberOfColumns, setNumberOfColumns] = React.useState<number>(3);
+
   React.useEffect(() => {
     (async () => {
       const results = await getTables();
       if (results.status == 200) {
         setTables(results.data);
+        setNumberOfColumns(results.data.length / 10 + 1);
+        console.log("number of ..." + Math.ceil(results.data.length / 10));
         setLoading(false);
         setError(false);
         localStorage.setItem(
@@ -166,12 +170,13 @@ export default function SelectTables(props: SelectTablesProps) {
       <List
         dense
         sx={{
-          width: "100%",
-          maxWidth: 360,
+          overflow: "auto",
           bgcolor: "background.paper",
           alignItems: "center",
           alignSelf: "center",
           justifyContent: "center",
+          display: "grid",
+          gridTemplateColumns: `repeat(${Math.ceil(tables.length / 10)}, 1fr)`,
         }}
       >
         {tables.map((value) => {
@@ -179,6 +184,10 @@ export default function SelectTables(props: SelectTablesProps) {
           return (
             <ListItem
               key={tables.indexOf(value)}
+              sx={{
+                maxWidth: 360,
+                margin: "20px",
+              }}
               secondaryAction={
                 <Checkbox
                   edge="end"

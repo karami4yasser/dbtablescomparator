@@ -24,51 +24,27 @@ public class DatabaseColumnComparator {
     }
 
     /**
-     * Compares two database columns using type checks and appropriate comparators.
      *
-     * @param obj1 The first column object.
-     * @param obj2 The second column object.
-     * @return An integer indicating the comparison result:
-     *         - 0 if the columns are equal.
-     *         - A positive value if obj1 is greater than obj2.
-     *         - A negative value if obj2 is greater than obj1.
-     * @throws IllegalArgumentException if no suitable comparator is found for the
-     *         columns' data types.
+     * @param obj1
+     * @param obj2
+     * @return comparison results, if returns 0 then equals , else are not equals
      */
     public static int compare(Object obj1, Object obj2) {
-        Objects.requireNonNull(obj1, "Object 1 cannot be null");
-        Objects.requireNonNull(obj2, "Object 2 cannot be null");
 
-        // Check for null values
-        if (obj1 == null || obj2 == null) {
-            return handleNulls(obj1, obj2);
+        if (obj1 == null && obj2 == null) {
+            return 0;
         }
-
+        if (obj1 == null || obj2 == null) {
+            return 1;
+        }
         // Use built-in or registered comparators based on data types
         Class<?> type1 = obj1.getClass();
         Comparator<Object> comparator = defaultComparators.get(type1);
         if (comparator != null) {
             return comparator.compare(obj1, obj2);
         }
-        else if (type1.isPrimitive()) {
-            // Handle primitive types using specific comparisons
-            // (e.g., int, char, etc.)
-            // Throw an exception if the type is not supported
-            throw new IllegalArgumentException("Unsupported data type: " + type1);
-        } else {
-            // Handle custom or unsupported data types
-            throw new IllegalArgumentException("Unsupported data type: " + type1);
-        }
-    }
-
-    private static int handleNulls(Object obj1, Object obj2) {
-        // Customize null handling behavior as needed (e.g., nulls last, nulls equal)
-        if (obj1 == obj2) {
-            return 0; // Both null, consider them equal
-        } else if (obj1 == null) {
-            return -1; // Null is less than non-null
-        } else {
-            return 1; // Non-null is greater than null
+         else {
+            return -1;
         }
     }
 }

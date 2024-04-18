@@ -37,7 +37,7 @@ public class DbTablesComparatorController
     @GetMapping("/tables")
     @ResponseBody
     public List<String> getTables() {
-        return dbTablesComparatorService.getTables();
+        return dbTablesComparatorService.getTables().stream().sorted().toList();
     }
 
     @GetMapping("/tables/details")

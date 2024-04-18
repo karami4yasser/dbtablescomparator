@@ -23,7 +23,7 @@ public class DBUtils {
     }
 
     public String getTablesSqlQuery() {
-        return "SELECT * FROM sys.user_tables LEFT JOIN sys.user_objects ON user_objects.object_type = 'TABLE'  AND user_objects.object_name = user_tables.table_name WHERE user_objects.oracle_maintained != 'Y'  AND NOT REGEXP_LIKE(user_tables.table_name, '^TEMP_')";
+        return "SELECT * FROM user_tables LEFT JOIN user_objects ON user_objects.object_type = 'TABLE'  AND user_objects.object_name = user_tables.table_name WHERE user_objects.oracle_maintained != 'Y'  AND NOT REGEXP_LIKE(user_tables.table_name, '^TEMP_')";
     }
     public List<String> getTables(){
         EntityManager entityManager = entityManagerFactory.createEntityManager();
